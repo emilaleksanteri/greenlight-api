@@ -9,13 +9,13 @@ import (
 
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Title   string   `json:"title"`
-		Year    int32    `json:"year"`
-		Runtime int32    `json:"runtime"`
-		Genres  []string `json:"genres"`
+		Title   string       `json:"title"`
+		Year    int32        `json:"year"`
+		Runtime data.Runtime `json:"runtime"`
+		Genres  []string     `json:"genres"`
 	}
 
-	err := app.readJSON(w, r, input) // mf wants a non nill pointer so init input 1st
+	err := app.readJSON(w, r, &input) // mf wants a non nill pointer so init input 1st
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
