@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/emilaleksanteri/greenlight-api/internal/data"
+	"github.com/emilaleksanteri/greenlight-api/internal/validator"
 	"net/http"
 	"time"
 )
@@ -18,6 +19,20 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 	err := app.readJSON(w, r, &input) // mf wants a non nill pointer so init input 1st
 	if err != nil {
 		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	valid := validator.New()
+	
+	data.ValidateMovie(valid, &data.Movie{
+		Title: input.Title,
+		Year: input.Year,
+		Runtime: input.Runtime,
+		Genres: input.Genres,
+	})
+	
+	if !valid.Valid() {
+		app.failedValidationResponse(w, r, valid.Errors)
 		return
 	}
 
