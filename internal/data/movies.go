@@ -2,11 +2,13 @@ package data
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"errors"
 
 	"context"
+
 	"github.com/emilaleksanteri/greenlight-api/internal/validator"
 	"github.com/lib/pq"
 )
@@ -125,13 +127,13 @@ func (m MovieModel) Delete(id int64) error {
 }
 
 func (m MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, error) {
-	query := `
+	query := fmt.Sprintf(`
 		select id, created_at, title, year, runtime, genres, version
 		from movies
 		where (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) or $1 = '')
 		and (genres @> $2 or $2 = '{}')
-		order by id
-	`
+		order by %s %s, id asc`,
+		filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

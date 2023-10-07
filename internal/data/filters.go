@@ -2,6 +2,8 @@ package data
 
 import (
 	"github.com/emilaleksanteri/greenlight-api/internal/validator"
+	"slices"
+	"strings"
 )
 
 type Filters struct {
@@ -9,6 +11,21 @@ type Filters struct {
 	PageSize     int
 	Sort         string
 	SortSafelist []string
+}
+
+func (f Filters) sortColumn() string {
+	if slices.Contains(f.SortSafelist, f.Sort) {
+		return strings.TrimPrefix(f.Sort, "-")
+	}
+	// case to protect against sql injections a bit better
+	panic("unsafe sort parameters: " + f.Sort)
+}
+
+func (f Filters) sortDirection() string {
+	if strings.HasPrefix(f.Sort, "-") {
+		return "DESC"
+	}
+	return "ASC"
 }
 
 func ValidateFilters(v *validator.Validator, f Filters) {
