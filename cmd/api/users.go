@@ -46,11 +46,11 @@ func (app *application) registerUserHandle(w http.ResponseWriter, r *http.Reques
 		}
 		return
 	}
-
-	if err := app.mailer.Send(user.Email, "user_welcome.tmpl", user); err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
-	}
+	go func() {
+		if err := app.mailer.Send(user.Email, "user_welcome.tmpl", user); err != nil {
+			app.logger.Error(err.Error())
+		}
+	}()
 
 	if err := app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil); err != nil {
 		app.serverErrorResponse(w, r, err)
