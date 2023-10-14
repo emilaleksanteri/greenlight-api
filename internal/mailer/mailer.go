@@ -51,7 +51,7 @@ func (m Mailer) Send(recipient, templateFile string, data any) error {
 	headers := map[string][]string{
 		"To":      {recipient},
 		"From":    {m.sender},
-		"Subject": {plainBody.String()},
+		"Subject": {subject.String()},
 	}
 
 	msg.SetHeaders(headers)
