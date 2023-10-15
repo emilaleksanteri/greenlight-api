@@ -1,2 +1,2 @@
-drop table if exists user_premissions;
-drop table if exists premissions;
+DROP TABLE IF EXISTS users_permissions;
+DROP TABLE IF EXISTS permissions;
