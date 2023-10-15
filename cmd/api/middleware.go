@@ -154,7 +154,7 @@ func (app *application) requireActivatedUser(next http.HandlerFunc) http.Handler
 func (app *application) requirePremission(code string, next http.HandlerFunc) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		user := app.contextGetUser(r)
-		premissions, err := app.models.Premissions.GetAllForUser(user.ID)
+		premissions, err := app.models.Permissions.GetAllForUser(user.ID)
 		if err != nil {
 			app.serverErrorResponse(w, r, err)
 			return

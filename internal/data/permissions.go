@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"github.com/lib/pq"
 )
 
-type Premissions []string
+type Permissions []string
 
-func (p Premissions) Include(code string) bool {
+func (p Permissions) Include(code string) bool {
 	for i := range p {
 		if code == p[i] {
 			return true
@@ -18,11 +20,11 @@ func (p Premissions) Include(code string) bool {
 	return false
 }
 
-type PremissionModel struct {
+type PermissionModel struct {
 	DB *sql.DB
 }
 
-func (m PremissionModel) GetAllForUser(userID int64) (Premissions, error) {
+func (m PermissionModel) GetAllForUser(userID int64) (Permissions, error) {
 	query := `
 		SELECT permissions.code
 		FROM permissions
@@ -39,7 +41,7 @@ func (m PremissionModel) GetAllForUser(userID int64) (Premissions, error) {
 	}
 	defer rows.Close()
 
-	var premissions Premissions
+	var permissions Permissions
 
 	for rows.Next() {
 		var premission string
@@ -48,12 +50,24 @@ func (m PremissionModel) GetAllForUser(userID int64) (Premissions, error) {
 			return nil, err
 		}
 
-		premissions = append(premissions, premission)
+		permissions = append(permissions, premission)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return premissions, nil
+	return permissions, nil
+}
+
+func (m PermissionModel) AddForUser(userID int64, codes ...string) error {
+	query := `
+		INSERT INTO users_permissions
+		SELECT $1, permissions.id FROM permissions WHERE permissions.code = ANY($2)
+	`
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, userID, pq.Array(codes))
+	return err
 }
