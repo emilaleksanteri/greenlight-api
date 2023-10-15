@@ -24,11 +24,11 @@ type PremissionModel struct {
 
 func (m PremissionModel) GetAllForUser(userID int64) (Premissions, error) {
 	query := `
-		select premissions.code
-		from premissions
-		inner join users_premissions on users_premissions.premission_id = premission.id
-		inner join users on users_premissions.user_id = users.id
-		where users.id = $1
+		SELECT permissions.code
+		FROM permissions
+		INNER JOIN users_permissions ON users_permissions.permission_id = permissions.id
+		INNER JOIN users ON users_permissions.user_id = users.id
+		WHERE users.id = $1
 	`
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
