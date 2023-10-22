@@ -47,6 +47,10 @@ db/migrations/new:
 # QUALITY CONTROL
 # ==================================================================================== #
 
+## format: just format all code
+.PHONY: format
+format:
+	go fmt ./...
 
 ## audit: tidy dependencies and format, vet and test all code
 .PHONY: audit

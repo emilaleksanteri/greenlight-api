@@ -1,2 +1,2 @@
 #!/bin/sh
-make audit
+make format
