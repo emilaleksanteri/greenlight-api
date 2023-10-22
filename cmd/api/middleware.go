@@ -62,7 +62,10 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 
 			mu.Lock()
 			if _, found := clients[ip]; !found {
-				clients[ip] = &client{limiter: rate.NewLimiter(rate.Limit(app.config.limiter.rps), 4)}
+				clients[ip] = &client{
+					limiter: rate.NewLimiter(
+						rate.Limit(app.config.limiter.rps), 4),
+				}
 			}
 
 			clients[ip].lastSeen = time.Now()
@@ -203,21 +206,54 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 }
 
 func (app *application) metrics(next http.Handler) http.Handler {
+	type CallsADebugVars struct {
+		time           time.Time
+		totalRequests  int64
+		processingTime int
+	}
 	var (
 		totalRequestsReceived           = expvar.NewInt("total_requests_received")
 		totalResponsesSent              = expvar.NewInt("total_requests_sent")
 		totalProcessingTimeMicroseconds = expvar.NewInt("total_processing_time_μs")
+		activeRequests                  = expvar.NewInt("active_requests")
+		requestsPerSecond               = expvar.NewInt("requests_per_second")
+		processingTimeBetweenRequests   = expvar.NewInt("processing_time_A_B_μs")
+		callsADebugVars                 CallsADebugVars
 	)
+
+	callToDebugVars := false
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
 		totalRequestsReceived.Add(1)
 
+		if r.URL.Path == "/debug/vars" {
+			if !callToDebugVars {
+				callToDebugVars = true
+				callsADebugVars = CallsADebugVars{
+					time:           start,
+					totalRequests:  totalRequestsReceived.Value(),
+					processingTime: int(totalProcessingTimeMicroseconds.Value()),
+				}
+			} else {
+				requestsPerSec := (totalRequestsReceived.Value() - callsADebugVars.totalRequests) / (int64(start.Second()) - int64(callsADebugVars.time.Second()))
+
+				processTime := (totalProcessingTimeMicroseconds.Value() - int64(callsADebugVars.processingTime)) / (totalRequestsReceived.Value() - callsADebugVars.totalRequests)
+
+				requestsPerSecond.Set(requestsPerSec)
+				processingTimeBetweenRequests.Set(processTime)
+				callToDebugVars = false
+			}
+		}
+
 		next.ServeHTTP(w, r)
 		totalResponsesSent.Add(1)
 
+		activeRequests.Set(totalRequestsReceived.Value() - totalResponsesSent.Value())
+
 		duration := time.Since(start).Microseconds()
 		totalProcessingTimeMicroseconds.Add(duration)
+
 	})
 }

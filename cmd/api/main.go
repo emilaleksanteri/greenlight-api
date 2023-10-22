@@ -89,7 +89,7 @@ func main() {
 	logger.Info("db connection pool established")
 
 	expvar.NewString("version").Set(version)
-	
+
 	expvar.Publish("goroutines", expvar.Func(func() any {
 		return runtime.NumGoroutine()
 	}))
