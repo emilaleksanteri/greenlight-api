@@ -1,3 +1,4 @@
 ./tmp
 ./cmd/api/tmp
 .envrc
+bin/

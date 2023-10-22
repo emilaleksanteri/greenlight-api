@@ -70,3 +70,20 @@ vendor:
 	go mod verify
 	@echo 'Vendoring deps...'
 	go mod vendor
+
+
+# ==================================================================================== #
+# BUILD
+# ==================================================================================== #
+
+## build/api: build the cmd/api application
+.PHONY: build/api
+build/api:
+	@echo 'Building cmd/api...'
+	go build -ldflags='-s' -o=./bin/api ./cmd/api
+	GOOS=linux GOARCH=amd64 go build -ldflags='-s' -o=./bin/linux_amd64/api ./cmd/api
+
+## build/run/api
+.PHONY: build/run/api
+build/run/api:
+	./bin/api -port=4040 -db-dsn=${GREENLIGHT_DB_DSN} -smtp-username=${GREENLIGHT_SMTP_USR} -smtp-password=${GREENLIGHT_SMTP_PASS} -smtp-sender=${GREENLIGHT_SMTP_SENDER}
