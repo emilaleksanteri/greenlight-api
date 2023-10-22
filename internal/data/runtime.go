@@ -1,9 +1,9 @@
 package data
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
-	"errors"
 	"strings"
 )
 
@@ -33,7 +33,7 @@ func (r *Runtime) UnmarshalJSON(josnVal []byte) error {
 	if err != nil {
 		return ErrInvalidRuntimeFormat
 	}
-	
+
 	*r = Runtime(i)
 	return nil
 }
