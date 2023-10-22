@@ -4,7 +4,6 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
-	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"github.com/emilaleksanteri/greenlight-api/internal/data"
+	"github.com/emilaleksanteri/greenlight-api/internal/ip"
 	"github.com/emilaleksanteri/greenlight-api/internal/validator"
 	"golang.org/x/time/rate"
 )
@@ -55,11 +55,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if app.config.limiter.enabled {
-			ip, _, err := net.SplitHostPort(r.RemoteAddr)
-			if err != nil {
-				app.serverErrorResponse(w, r, err)
-				return
-			}
+			ip := ip.FromRequest(r)
 
 			mu.Lock()
 			if _, found := clients[ip]; !found {
