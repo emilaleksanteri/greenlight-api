@@ -1,3 +1,6 @@
+# include env vars from .envrc
+include .envrc
+
 ## help: print this help message
 .PHONY: help
 help:
@@ -11,7 +14,7 @@ confirm:
 ## run/api: run the cmd/api application
 .PHONY: run/api
 api/run:
-	go run ./cmd/api
+	go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN} -smtp-username=${GREENLIGHT_SMTP_USR} -smtp-password=${GREENLIGHT_SMTP_PASS} -smtp-sender=${GREENLIGHT_SMTP_SENDER}
 
 ## db/psql: connect to the db using psql
 .PHONY: db/psql

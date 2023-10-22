@@ -286,7 +286,7 @@ func (app *application) metrics(next http.Handler) http.Handler {
 			}
 		}
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(mw, r)
 		totalResponsesSent.Add(1)
 
 		totalResponsesSentByStatus.Add(strconv.Itoa(mw.statusCode), 1)
