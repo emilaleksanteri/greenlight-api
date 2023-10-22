@@ -61,3 +61,12 @@ audit:
 	staticcheck ./...
 	@echo 'Running tests...'
 	go test -race -vet=off ./...
+
+## vendor: tidy and vendor dependencies
+.PHONY: vendor
+vendor:
+	@echo 'Tidying and verifying module deps...'
+	go mod tidy
+	go mod verify
+	@echo 'Vendoring deps...'
+	go mod vendor

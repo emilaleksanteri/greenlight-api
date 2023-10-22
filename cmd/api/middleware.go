@@ -276,12 +276,15 @@ func (app *application) metrics(next http.Handler) http.Handler {
 					processingTime: int(totalProcessingTimeMicroseconds.Value()),
 				}
 			} else {
-				requestsPerSec := (totalRequestsReceived.Value() - callsADebug.totalRequests) / (int64(start.Second()) - int64(callsADebug.time.Second()))
+				if start.Second() != callsADebug.time.Second() && totalRequestsReceived.Value()-callsADebug.totalRequests != 0 {
+					requestsPerSec := (totalRequestsReceived.Value() - callsADebug.totalRequests) / (int64(start.Second()) - int64(callsADebug.time.Second()))
 
-				processTime := (totalProcessingTimeMicroseconds.Value() - int64(callsADebug.processingTime)) / (totalRequestsReceived.Value() - callsADebug.totalRequests)
+					processTime := (totalProcessingTimeMicroseconds.Value() - int64(callsADebug.processingTime)) / (totalRequestsReceived.Value() - callsADebug.totalRequests)
 
-				requestsPerSecond.Set(requestsPerSec)
-				processingTimeBetweenRequests.Set(processTime)
+					requestsPerSecond.Set(requestsPerSec)
+					processingTimeBetweenRequests.Set(processTime)
+				}
+
 				callToDebugVars = false
 			}
 		}
